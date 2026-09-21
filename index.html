@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Servidor do Marreco</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#12181A; --panel:#1B2427; --rune:#8FB8A8; --rune-dim:#5C7A70;
+  --ember:#C97B4A; --ink:#E9EEEC; --muted:#8FA098; --rule:#2A3538;
+}
+:root:not([data-theme="light"]){ }
+:root[data-theme="light"]{
+  --bg:#EFEDE4; --panel:#FFFFFF; --rune:#3D6B58; --rune-dim:#7C9689;
+  --ember:#B85C2E; --ink:#1C231F; --muted:#5B665F; --rule:#DAD5C6;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0)}
+body{
+  margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font-family:"Source Sans 3",system-ui,sans-serif;
+  padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0);
+  background-image:
+    radial-gradient(ellipse at top, rgba(143,184,168,0.06), transparent 60%);
+}
+.wrap{max-width:30rem;margin:0 auto;padding:2.5rem 1.25rem 3rem}
+h1{
+  font-family:Cinzel,serif;font-weight:700;font-size:1.9rem;
+  letter-spacing:.02em;margin:0 0 .3rem;text-align:center;color:var(--ink);
+}
+.sub{text-align:center;color:var(--muted);font-size:.95rem;margin:0 0 2.2rem}
+.rune-divider{
+  text-align:center;color:var(--rune-dim);letter-spacing:.5em;
+  font-size:.9rem;margin:0 0 2rem;
+}
+.card{
+  background:var(--panel);border:1px solid var(--rule);border-radius:10px;
+  padding:1.4rem 1.3rem;margin-bottom:1.1rem;
+}
+.status-row{display:flex;align-items:center;gap:.7rem;margin-bottom:.2rem}
+.dot{width:.6rem;height:.6rem;border-radius:50%;background:var(--muted);flex-shrink:0}
+.dot.on{background:var(--rune);box-shadow:0 0 8px var(--rune)}
+.dot.off{background:#6b4a3a}
+.status-text{font-family:Cinzel,serif;font-weight:600;font-size:1.05rem}
+.status-detail{color:var(--muted);font-size:.88rem;margin-top:.5rem;line-height:1.6}
+.status-detail strong{color:var(--ink);font-weight:600}
+
+.btn{
+  display:block;width:100%;padding:.95rem 1rem;margin-bottom:.8rem;
+  border-radius:8px;border:1px solid var(--rule);background:transparent;
+  color:var(--ink);font-family:"Source Sans 3",sans-serif;font-weight:600;
+  font-size:1rem;cursor:pointer;transition:border-color .15s,transform .1s;
+  -webkit-tap-highlight-color:transparent;text-align:center;text-decoration:none;
+  box-sizing:border-box;
+}
+.btn:active{transform:scale(.98)}
+.btn-ligar{background:var(--rune);color:var(--bg);border-color:var(--rune)}
+.btn-desligar{border-color:#8a4a34;color:#c97b4a}
+.btn-status{color:var(--muted)}
+.btn:disabled{opacity:.5;cursor:default;transform:none}
+
+.log{
+  font-size:.85rem;color:var(--muted);text-align:center;
+  min-height:1.4em;margin-top:.3rem;
+}
+.log.ok{color:var(--rune)}
+.log.err{color:var(--ember)}
+
+footer{text-align:center;color:var(--rune-dim);font-size:.8rem;margin-top:2rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Servidor do Marreco</h1>
+  <p class="sub">Valheim &middot; ligue de onde estiver</p>
+  <div class="rune-divider">ᛗᚨᚱᚱᛖᚲᛟ ᛋᛖᚱᚹᛖᚱ</div>
+
+  <a class="btn btn-ligar" id="btnLigar" href="http://marrecoserver.duckdns.org:8321/ligar" target="_blank" rel="noopener">Ligar servidor</a>
+
+  <footer>marrecoserver.duckdns.org</footer>
+</div>
+
+</body>
+</html>
