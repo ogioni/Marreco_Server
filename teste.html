@@ -71,7 +71,7 @@ h1{
 
 footer{text-align:center;color:var(--rune-dim);font-size:.8rem;margin-top:2rem}
 .brasao{display:block!important;width:320px!important;max-width:100%!important;height:auto!important;margin:0 auto 1.2rem;border-radius:6px;}\n
-.status-real{display:flex;align-items:center;justify-content:center;gap:.6rem;margin:0 auto 1.4rem;color:var(--muted);font-size:.95rem}.status-real .status-dot{width:.7rem;height:.7rem;border-radius:50%;background:var(--muted)}.status-real.on{color:var(--rune)}.status-real.on .status-dot{background:var(--rune);box-shadow:0 0 8px var(--rune)}.status-real.off{color:var(--ember)}.status-real.off .status-dot{background:var(--ember);box-shadow:0 0 8px var(--ember)}
+.status-real{display:flex;align-items:center;justify-content:center;gap:.6rem;margin:0 auto 1.4rem;color:var(--muted);font-size:.95rem}.status-real .status-dot{width:.7rem;height:.7rem;border-radius:50%;background:var(--muted)}.status-real.on{color:var(--rune)}.status-real.on .status-dot{background:var(--rune);box-shadow:0 0 8px var(--rune)}.status-real.off{color:var(--ember)}.status-real.off .status-dot{background:var(--ember);box-shadow:0 0 8px var(--ember)}.status-real.unavailable{color:#D7B44A}.status-real.unavailable .status-dot{background:#D7B44A;box-shadow:0 0 8px #D7B44A}
 </style>
 </head>
 <body>
@@ -103,7 +103,7 @@ async function atualizarStatusReal(){
     box.className='status-real '+(ativo?'on':'off');
     label.textContent=ativo?'Servidor ativo':'Servidor desligado';
   }catch(e){
-    box.className='status-real';
+    box.className='status-real unavailable';
     label.textContent='Status indisponível';
   }
 }
