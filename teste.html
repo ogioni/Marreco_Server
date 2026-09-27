@@ -118,7 +118,7 @@ function atualizarStatusReal(){
     box.className='status-real unavailable';
     label.textContent='Status indisponível';
   };
-  img.src='http://marrecoserver.duckdns.org:8321/status.png?ts='+Date.now();
+  img.src='https://white-brook-c32d.ogioni-bh.workers.dev/status.png?ts='+Date.now();
 }
 atualizarStatusReal();
 setInterval(atualizarStatusReal,15000);
