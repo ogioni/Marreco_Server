@@ -115,8 +115,11 @@ async function readStatus() {
   } catch (error) {
     statusDot.className = 'dot'; statusText.textContent = 'Status indisponível';
     statusDetail.textContent = 'Não foi possível consultar o ESP32 agora.';
-    btnLigar.classList.add('hidden'); btnJoin.classList.add('hidden');
-    setLog('Falha ao consultar o status.', 'err'); return null;
+    // Mesmo sem status, o comando de ligar deve continuar disponível.
+    btnLigar.classList.remove('hidden');
+    btnJoin.classList.add('hidden');
+    statusDetail.textContent = 'Não foi possível consultar o ESP32. Você ainda pode tentar ligar o servidor.';
+    setLog('Status indisponível; botão de ligar liberado.', 'err'); return null;
   }
 }
 function updateStatus(active) {
@@ -145,6 +148,13 @@ async function startServer(password) {
     }, 5000);
     await readStatus();
   } catch (error) {
+    // GitHub Pages (HTTPS) pode bloquear fetch para o ESP32 (HTTP).
+    // A navegação direta mantém o comportamento do index antigo.
+    if (error instanceof TypeError || /Failed to fetch|NetworkError/i.test(error.message || '')) {
+      setStartLog('Abrindo o comando direto do ESP32...', 'ok');
+      window.location.assign(url('/ligar?senha=' + encodeURIComponent(password)));
+      return;
+    }
     setStartLog(error.message || 'Não foi possível ligar o servidor.', 'err');
     setTimeout(() => { startingView.classList.add('hidden'); homeView.classList.remove('hidden'); readStatus(); }, 2500);
   }
