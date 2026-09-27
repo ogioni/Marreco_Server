@@ -89,23 +89,36 @@ footer{text-align:center;color:var(--rune-dim);font-size:.8rem;margin-top:2rem}
 
 
 <script>
-async function atualizarStatusReal(){
+function atualizarStatusReal(){
   const box=document.getElementById('statusReal');
   const label=document.getElementById('statusLabel');
-  try{
-    const r=await fetch('http://marrecoserver.duckdns.org:8321/status.png?ts='+Date.now(),{cache:'no-store'});
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const b=await createImageBitmap(await r.blob());
-    const c=document.createElement('canvas'); c.width=b.width; c.height=b.height;
-    const x=c.getContext('2d'); x.drawImage(b,0,0);
-    const p=x.getImageData(0,0,1,1).data; b.close();
-    const ativo=p[1]>p[0];
-    box.className='status-real '+(ativo?'on':'off');
-    label.textContent=ativo?'Servidor ativo':'Servidor desligado';
-  }catch(e){
+  const img=new Image();
+  img.crossOrigin='anonymous';
+  const timeout=setTimeout(()=>{
+    img.src='';
     box.className='status-real unavailable';
     label.textContent='Status indisponível';
-  }
+  },8000);
+  img.onload=()=>{
+    clearTimeout(timeout);
+    try{
+      const c=document.createElement('canvas'); c.width=img.naturalWidth; c.height=img.naturalHeight;
+      const x=c.getContext('2d'); x.drawImage(img,0,0);
+      const p=x.getImageData(0,0,1,1).data;
+      const ativo=p[1]>p[0];
+      box.className='status-real '+(ativo?'on':'off');
+      label.textContent=ativo?'Servidor ativo':'Servidor desligado';
+    }catch(e){
+      box.className='status-real unavailable';
+      label.textContent='Status indisponível';
+    }
+  };
+  img.onerror=()=>{
+    clearTimeout(timeout);
+    box.className='status-real unavailable';
+    label.textContent='Status indisponível';
+  };
+  img.src='http://marrecoserver.duckdns.org:8321/status.png?ts='+Date.now();
 }
 atualizarStatusReal();
 setInterval(atualizarStatusReal,15000);
