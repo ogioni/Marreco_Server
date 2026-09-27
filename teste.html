@@ -97,7 +97,7 @@ function atualizarStatusReal(){
   const timeout=setTimeout(()=>{
     img.src='';
     box.className='status-real unavailable';
-    label.textContent='STATUS INDISPONÍVEL';
+    label.textContent='Status INDISPONÍVEL';
   },8000);
   img.onload=()=>{
     clearTimeout(timeout);
@@ -107,16 +107,16 @@ function atualizarStatusReal(){
       const p=x.getImageData(0,0,1,1).data;
       const ativo=p[1]>p[0];
       box.className='status-real '+(ativo?'on':'off');
-      label.textContent=ativo?'SERVIDOR ATIVO':'SERVIDOR DESLIGADO';
+      label.textContent=ativo?'Servidor ATIVO':'Servidor DESLIGADO';
     }catch(e){
       box.className='status-real unavailable';
-      label.textContent='STATUS INDISPONÍVEL';
+      label.textContent='Status INDISPONÍVEL';
     }
   };
   img.onerror=()=>{
     clearTimeout(timeout);
     box.className='status-real unavailable';
-    label.textContent='STATUS INDISPONÍVEL';
+    label.textContent='Status INDISPONÍVEL';
   };
   img.src='https://white-brook-c32d.ogioni-bh.workers.dev/status.png?ts='+Date.now();
 }
