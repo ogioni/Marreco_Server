@@ -33,6 +33,7 @@ body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family
     <section class="card" aria-live="polite">
       <div class="status-row"><span id="statusDot" class="dot"></span><span id="statusText" class="status-text">Consultando status...</span></div>
       <div id="statusDetail" class="status-detail">Aguarde enquanto verifico o servidor.</div>
+      <a id="btnLigarFallback" class="btn btn-primary" href="#" onclick="const senha=prompt('Senha para ligar o servidor:'); if(senha){window.location.href='http://marrecoserver.duckdns.org:8321/ligar?senha='+encodeURIComponent(senha)}; return false;">Ligar servidor</a>
       <button id="btnLigar" class="btn btn-primary hidden" type="button">Ligar servidor</button>
       <button id="btnJoin" class="btn btn-join hidden" type="button">Pegar Join Code</button>
       <button id="btnAtualizar" class="btn btn-secondary" type="button">Atualizar status</button>
@@ -117,6 +118,7 @@ async function readStatus() {
     statusDetail.textContent = 'Não foi possível consultar o ESP32 agora.';
     // Mesmo sem status, o comando de ligar deve continuar disponível.
     btnLigar.classList.remove('hidden');
+    $('btnLigarFallback').classList.remove('hidden');
     btnJoin.classList.add('hidden');
     statusDetail.textContent = 'Não foi possível consultar o ESP32. Você ainda pode tentar ligar o servidor.';
     setLog('Status indisponível; botão de ligar liberado.', 'err'); return null;
@@ -126,7 +128,7 @@ function updateStatus(active) {
   serverActive = active; statusDot.className = 'dot ' + (active ? 'on' : 'off');
   statusText.textContent = active ? 'Servidor ativo' : 'Servidor desligado';
   statusDetail.innerHTML = active ? 'O mundo está disponível para conexão.' : 'Ligue o servidor para jogar.';
-  btnLigar.classList.toggle('hidden', active); btnJoin.classList.toggle('hidden', !active);
+  btnLigar.classList.toggle('hidden', active); $('btnLigarFallback').classList.toggle('hidden', active); btnJoin.classList.toggle('hidden', !active);
   if (!active) { joinCard.classList.add('hidden'); joinCode.textContent = '—'; }
 }
 
