@@ -74,6 +74,8 @@ footer{text-align:center;color:var(--rune-dim);font-size:.8rem;margin-top:2rem}
 .status-real #statusLabel{display:inline-block;margin-left:2rem}.status-real{display:flex;align-items:center;justify-content:center;gap:1.5rem;margin:0 auto 1.1rem;line-height:1;color:var(--muted);font-size:.95rem}.status-real .status-dot{display:inline-block;width:1rem;height:1rem;min-width:1rem;border-radius:50%;background:#293133;border:1px solid #4B5958;box-shadow:inset 2px 2px 3px rgba(0,0,0,.55),inset -1px -1px 2px rgba(255,255,255,.08)}.status-real.on{color:var(--rune)}.status-real.on .status-dot{background:radial-gradient(circle at 35% 30%,#E7FFF4 0 12%,var(--rune) 42%,#477565 100%);border-color:var(--rune);box-shadow:0 0 5px var(--rune),0 0 14px rgba(143,184,168,.65),inset -2px -2px 3px rgba(0,0,0,.25);animation:ledPulse 2s ease-in-out infinite}.status-real.off{color:var(--ember)}.status-real.off .status-dot{background:radial-gradient(circle at 35% 30%,#FFE8DC 0 10%,var(--ember) 42%,#713C2C 100%);border-color:var(--ember);box-shadow:0 0 5px var(--ember),0 0 14px rgba(201,123,74,.5),inset -2px -2px 3px rgba(0,0,0,.25);animation:ledPulse 2s ease-in-out infinite}.status-real.unavailable{color:var(--muted)}.status-real.unavailable .status-dot{background:#252D2E;border-color:#3B4746;box-shadow:inset 2px 2px 3px rgba(0,0,0,.65),inset -1px -1px 2px rgba(255,255,255,.06)}@keyframes ledPulse{0%,100%{filter:brightness(.82)}50%{filter:brightness(1.18)}}
 
 .join-code-box{margin:0 auto 1.4rem;text-align:center;color:var(--muted)}.join-code-label{display:block;font-size:.85rem;margin-bottom:.35rem}.join-code-value{display:inline-block;font-family:ui-monospace,SFMono-Regular,monospace;font-size:1.35rem;letter-spacing:.08em;color:var(--rune);background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:.55rem 1rem}
+
+[hidden]{display:none!important}.boot-progress{margin:1rem 0 1.2rem}.boot-progress-head{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:.86rem;margin-bottom:.45rem}.boot-progress-head strong{color:var(--rune);font-weight:600}.boot-track{height:.65rem;border-radius:99px;background:var(--rule);overflow:hidden}.boot-bar{height:100%;width:0;background:var(--rune);border-radius:99px;transition:width .5s ease}
 </style>
 </head>
 <body>
@@ -85,69 +87,89 @@ footer{text-align:center;color:var(--rune-dim);font-size:.8rem;margin-top:2rem}
   <div id="joinCodeBox" class="join-code-box" hidden><span class="join-code-label">Join Code</span><strong id="joinCodeValue" class="join-code-value"></strong></div>
   <div class="rune-divider">ᛗᚨᚱᚱᛖᚲᛟ ᛋᛖᚱᚹᛖᚱ</div>
 
-  <button class="btn btn-ligar" id="btnLigar" type="button" onclick="window.location.href='http://marrecoserver.duckdns.org:8321/ligar?senha=crbr'">Ligar servidor</button>
+  <button class="btn btn-ligar" id="btnLigar" type="button">Ligar servidor</button>
 
+
+  <div id="bootProgress" class="boot-progress" hidden><div class="boot-progress-head"><span id="bootLabel">Preparando...</span><strong id="bootPercent">0%</strong></div><div class="boot-track"><div id="bootBar" class="boot-bar"></div></div></div>
   <footer>marrecoserver.duckdns.org</footer>
 </div>
 
 
 <script>
+const WORKER_URL='https://white-brook-c32d.ogioni-bh.workers.dev';
+const SENHA='crbr';
+
+function setProgress(percent,label){
+  document.getElementById('bootBar').style.width=percent+'%';
+  document.getElementById('bootPercent').textContent=percent+'%';
+  document.getElementById('bootLabel').textContent=label;
+}
+
+function lerStatus(){
+  return new Promise(resolve=>{
+    const img=new Image(); img.crossOrigin='anonymous';
+    const timer=setTimeout(()=>{img.src='';resolve(null)},8000);
+    img.onload=()=>{
+      clearTimeout(timer);
+      try{
+        const c=document.createElement('canvas'); c.width=img.naturalWidth; c.height=img.naturalHeight;
+        const x=c.getContext('2d'); x.drawImage(img,0,0);
+        const p=x.getImageData(0,0,1,1).data; resolve(p[1]>p[0]);
+      }catch(e){resolve(null)}
+    };
+    img.onerror=()=>{clearTimeout(timer);resolve(null)};
+    img.src=WORKER_URL+'/status.png?ts='+Date.now();
+  });
+}
 
 async function atualizarJoinCode(ativo){
   const box=document.getElementById('joinCodeBox');
   const value=document.getElementById('joinCodeValue');
-  if(!ativo){ box.hidden=true; value.textContent=''; return; }
+  if(!ativo){box.hidden=true;value.textContent='';return;}
   try{
-    const r=await fetch('https://white-brook-c32d.ogioni-bh.workers.dev/joincode?senha=crbr&ts='+Date.now(),{cache:'no-store'});
+    const r=await fetch(WORKER_URL+'/joincode?senha='+SENHA+'&ts='+Date.now(),{cache:'no-store'});
     if(!r.ok) throw new Error('HTTP '+r.status);
     const data=await r.json();
-    if(data.ativo && data.joincode){
-      value.textContent=data.joincode;
-      box.hidden=false;
-    }else{
-      box.hidden=true;
-      value.textContent='';
-    }
-  }catch(e){
-    box.hidden=true;
-    value.textContent='';
-  }
+    if(data.joincode){value.textContent=data.joincode;box.hidden=false;}
+    else{value.textContent='Aguardando Join Code...';box.hidden=false;}
+  }catch(e){box.hidden=true;value.textContent='';}
 }
 
-function atualizarStatusReal(){
+async function atualizarStatusReal(){
   const box=document.getElementById('statusReal');
   const label=document.getElementById('statusLabel');
-  const img=new Image();
-  img.crossOrigin='anonymous';
-  const timeout=setTimeout(()=>{
-    img.src='';
-    box.className='status-real unavailable';
-    label.textContent='Status INDISPONÍVEL';
-    atualizarJoinCode(false);
-  },8000);
-  img.onload=()=>{
-    clearTimeout(timeout);
-    try{
-      const c=document.createElement('canvas'); c.width=img.naturalWidth; c.height=img.naturalHeight;
-      const x=c.getContext('2d'); x.drawImage(img,0,0);
-      const p=x.getImageData(0,0,1,1).data;
-      const ativo=p[1]>p[0];
-      box.className='status-real '+(ativo?'on':'off');
-      label.textContent=ativo?'Servidor ATIVO':'Servidor DESLIGADO';
-      atualizarJoinCode(ativo);
-    }catch(e){
-      box.className='status-real unavailable';
-      label.textContent='Status INDISPONÍVEL';
-    }
-  };
-  img.onerror=()=>{
-    clearTimeout(timeout);
-    box.className='status-real unavailable';
-    label.textContent='Status INDISPONÍVEL';
-    atualizarJoinCode(false);
-  };
-  img.src='https://white-brook-c32d.ogioni-bh.workers.dev/status.png?ts='+Date.now();
+  const ativo=await lerStatus();
+  if(ativo===true){box.className='status-real on';label.textContent='Servidor ATIVO';}
+  else if(ativo===false){box.className='status-real off';label.textContent='Servidor DESLIGADO';}
+  else{box.className='status-real unavailable';label.textContent='Status INDISPONÍVEL';}
+  await atualizarJoinCode(ativo===true);
+  return ativo;
 }
+
+async function ligarServidor(){
+  const senha=prompt('Digite a senha para ligar o servidor:');
+  if(senha===null) return;
+  if(senha!==SENHA){alert('Senha inválida.');return;}
+  const btn=document.getElementById('btnLigar');
+  const progress=document.getElementById('bootProgress');
+  btn.disabled=true; progress.hidden=false; setProgress(5,'Enviando comando...');
+  try{
+    const r=await fetch(WORKER_URL+'/ligar?senha='+encodeURIComponent(senha)+'&ts='+Date.now(),{cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    setProgress(12,'Comando recebido. Aguardando servidor...');
+    for(let i=0;i<40;i++){
+      await new Promise(resolve=>setTimeout(resolve,3000));
+      const ativo=await atualizarStatusReal();
+      if(ativo===true){setProgress(100,'Servidor ativo!');return;}
+      setProgress(Math.min(95,12+Math.round((i+1)*2.05)),'Aguardando servidor...');
+    }
+    setProgress(95,'Ainda iniciando...');
+  }catch(e){
+    setProgress(0,'Não foi possível enviar o comando.');
+  }finally{btn.disabled=false;}
+}
+
+document.getElementById('btnLigar').addEventListener('click',ligarServidor);
 atualizarStatusReal();
 setInterval(atualizarStatusReal,15000);
 </script>
