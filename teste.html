@@ -160,7 +160,7 @@ async function ligarServidor(){
     for(let i=0;i<40;i++){
       await new Promise(resolve=>setTimeout(resolve,3000));
       const ativo=await atualizarStatusReal();
-      if(ativo===true){setProgress(100,'Servidor ativo!');return;}
+      if(ativo===true){setProgress(100,'Servidor ativo!');document.getElementById('bootProgress').hidden=true;return;}
       setProgress(Math.min(95,12+Math.round((i+1)*2.05)),'Aguardando servidor...');
     }
     setProgress(95,'Ainda iniciando...');
