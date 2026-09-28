@@ -126,14 +126,14 @@ function lerStatus(){
 async function atualizarJoinCode(ativo){
   const box=document.getElementById('joinCodeBox');
   const value=document.getElementById('joinCodeValue');
-  if(!ativo || !joinAutorizado){box.hidden=true;value.textContent='';return;}
+  if(!ativo || !joinAutorizado){box.hidden=true;box.style.display='none';value.textContent='';return;}
   try{
     const r=await fetch(WORKER_URL+'/joincode?senha='+SENHA+'&ts='+Date.now(),{cache:'no-store'});
     if(!r.ok) throw new Error('HTTP '+r.status);
     const data=await r.json();
-    if(data.joincode){value.textContent=data.joincode;box.hidden=false;}
-    else{value.textContent='Aguardando Join Code...';box.hidden=false;}
-  }catch(e){box.hidden=true;value.textContent='';}
+    if(data.joincode){value.textContent=data.joincode;box.hidden=false;box.style.display='block';}
+    else{value.textContent='Aguardando Join Code...';box.hidden=false;box.style.display='block';}
+  }catch(e){box.hidden=true;box.style.display='none';value.textContent='';}
 }
 
 async function atualizarStatusReal(){
