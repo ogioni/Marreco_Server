@@ -98,6 +98,7 @@ footer{text-align:center;color:var(--rune-dim);font-size:.8rem;margin-top:2rem}
 <script>
 const WORKER_URL='https://white-brook-c32d.ogioni-bh.workers.dev';
 const SENHA='crbr';
+let joinAutorizado=false;
 
 function setProgress(percent,label){
   document.getElementById('bootBar').style.width=percent+'%';
@@ -125,7 +126,7 @@ function lerStatus(){
 async function atualizarJoinCode(ativo){
   const box=document.getElementById('joinCodeBox');
   const value=document.getElementById('joinCodeValue');
-  if(!ativo){box.hidden=true;value.textContent='';return;}
+  if(!ativo || !joinAutorizado){box.hidden=true;value.textContent='';return;}
   try{
     const r=await fetch(WORKER_URL+'/joincode?senha='+SENHA+'&ts='+Date.now(),{cache:'no-store'});
     if(!r.ok) throw new Error('HTTP '+r.status);
@@ -156,6 +157,7 @@ async function ligarServidor(){
   try{
     const r=await fetch(WORKER_URL+'/ligar?senha='+encodeURIComponent(senha)+'&ts='+Date.now(),{cache:'no-store'});
     if(!r.ok) throw new Error('HTTP '+r.status);
+    joinAutorizado=true;
     setProgress(12,'Comando recebido. Aguardando servidor...');
     for(let i=0;i<40;i++){
       await new Promise(resolve=>setTimeout(resolve,3000));
