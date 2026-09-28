@@ -99,6 +99,7 @@ footer{text-align:center;color:var(--rune-dim);font-size:.8rem;margin-top:2rem}
 const WORKER_URL='https://white-brook-c32d.ogioni-bh.workers.dev';
 const SENHA='crbr';
 let joinAutorizado=false;
+let servidorAtivo=false;
 
 function setProgress(percent,label){
   document.getElementById('bootBar').style.width=percent+'%';
@@ -140,17 +141,24 @@ async function atualizarStatusReal(){
   const box=document.getElementById('statusReal');
   const label=document.getElementById('statusLabel');
   const ativo=await lerStatus();
-  if(ativo===true){box.className='status-real on';label.textContent='Servidor ATIVO';}
-  else if(ativo===false){box.className='status-real off';label.textContent='Servidor DESLIGADO';}
-  else{box.className='status-real unavailable';label.textContent='Status INDISPONÍVEL';}
-  await atualizarJoinCode(ativo===true);
+  servidorAtivo=ativo===true;
+  const btn=document.getElementById('btnLigar');
+  if(servidorAtivo){box.className='status-real on';label.textContent='Servidor ATIVO';btn.textContent='Join Code';btn.className='btn btn-join';}
+  else if(ativo===false){box.className='status-real off';label.textContent='Servidor DESLIGADO';btn.textContent='Ligar servidor';btn.className='btn btn-ligar';}
+  else{box.className='status-real unavailable';label.textContent='Status INDISPONÍVEL';btn.textContent='Ligar servidor';btn.className='btn btn-ligar';}
+  await atualizarJoinCode(servidorAtivo);
   return ativo;
 }
 
 async function ligarServidor(){
-  const senha=prompt('Digite a senha para ligar o servidor:');
+  const senha=prompt(servidorAtivo?'Digite a senha para liberar o Join Code:':'Digite a senha para ligar o servidor:');
   if(senha===null) return;
   if(senha!==SENHA){alert('Senha inválida.');return;}
+  if(servidorAtivo){
+    joinAutorizado=true;
+    await atualizarJoinCode(true);
+    return;
+  }
   const btn=document.getElementById('btnLigar');
   const progress=document.getElementById('bootProgress');
   btn.disabled=true; progress.hidden=false; setProgress(5,'Enviando comando...');
