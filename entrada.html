@@ -28,7 +28,7 @@ footer{color:var(--rune-dim);font-size:.8rem;margin-top:2.5rem}.status-stack{dis
   <div class="rune-divider">✦ ✦ ✦</div>
   <div class="status-stack" aria-live="polite">
     <div id="machineStatus" class="status-real unavailable"><span class="status-dot"></span><span id="machineLabel">Máquina INDISPONÍVEL</span></div>
-    <div id="serverStatus" class="status-real unavailable"><span class="status-dot"></span><span id="serverLabel">Servidor INDISPONÍVEL — Jogo Atual: Valheim</span></div>
+    <div id="serverStatus" class="status-real unavailable"><span class="status-dot"></span><span id="serverLabel">Servidor INDISPONÍVEL</span></div>
   </div>
   <footer>Escolha um servidor para continuar</footer>
   <script>
@@ -49,11 +49,11 @@ footer{color:var(--rune-dim);font-size:.8rem;margin-top:2.5rem}.status-stack{dis
         atualizarLed('machineStatus','machineLabel','Máquina',data.maquina===true);
         const server=document.getElementById('serverStatus'), label=document.getElementById('serverLabel');
         if(data.servidor===true){server.className='status-real on';label.textContent='Servidor LIGADO — Jogo Atual: '+JOGO_ATUAL;}
-        else if(data.servidor===false){server.className='status-real off';label.textContent='Servidor DESLIGADO — Jogo Atual: '+JOGO_ATUAL;}
-        else{server.className='status-real unavailable';label.textContent='Servidor INDISPONÍVEL — Jogo Atual: '+JOGO_ATUAL;}
+        else if(data.servidor===false){server.className='status-real off';label.textContent='Servidor DESLIGADO';}
+        else{server.className='status-real unavailable';label.textContent='Servidor INDISPONÍVEL';}
       }catch(e){
         atualizarLed('machineStatus','machineLabel','Máquina',null);
-        const server=document.getElementById('serverStatus');server.className='status-real unavailable';document.getElementById('serverLabel').textContent='Servidor INDISPONÍVEL — Jogo Atual: '+JOGO_ATUAL;
+        const server=document.getElementById('serverStatus');server.className='status-real unavailable';document.getElementById('serverLabel').textContent='Servidor INDISPONÍVEL';
       }
     }
     atualizarStatus();
