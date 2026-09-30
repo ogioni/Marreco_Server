@@ -93,6 +93,7 @@ footer{text-align:center;color:var(--rune-dim);font-size:.8rem;margin-top:2rem}
   <div class="rune-divider">ᛗᚨᚱᚱᛖᚲᛟ ᛋᛖᚱᚹᛖᚱ</div>
 
   <button class="btn btn-ligar" id="btnLigar" type="button">Ligar servidor</button>
+  <button class="btn btn-status" id="btnConfig" type="button" disabled>Configurações do Valheim</button>
 
 
   <div id="bootProgress" class="boot-progress" hidden><div class="boot-progress-head"><span id="bootLabel">Preparando...</span><strong id="bootPercent">0%</strong></div><div class="boot-track"><div id="bootBar" class="boot-bar"></div></div></div>
@@ -153,6 +154,9 @@ async function atualizarStatusReal(){
   const btn=document.getElementById('btnLigar');
   if(servidorAtivo){btn.textContent='Join Code';btn.className='btn btn-join';}
   else{btn.textContent='Ligar servidor';btn.className='btn btn-ligar';}
+  const configBtn=document.getElementById('btnConfig');
+  configBtn.disabled=servidorAtivo!==true;
+  configBtn.className=servidorAtivo?'btn btn-join':'btn btn-status';
   await atualizarJoinCode(servidorAtivo);
   return servidor;
 }
@@ -187,6 +191,7 @@ async function ligarServidor(){
 }
 
 document.getElementById('btnLigar').addEventListener('click',ligarServidor);
+document.getElementById('btnConfig').addEventListener('click',()=>{ if(servidorAtivo===true) window.location.href='configuracoes_valheim.html'; });
 atualizarStatusReal();
 setInterval(atualizarStatusReal,15000);
 </script>
