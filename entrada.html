@@ -41,8 +41,11 @@ footer{color:var(--rune-dim);font-size:.8rem;margin-top:2.5rem}.btn{display:bloc
     function atualizarBrasao(data){
       const img=document.getElementById('brasaoJogo');
       // O mapa receberá os brasões temáticos quando forem criados; por enquanto mantém a base oficial.
-      const brasoes={'valheim':'brasao_marreco_base.jpg'};
-      const jogo=nomeDoJogo(data).toLowerCase();
+      const brasoes={
+        'valheim':'brasao_valheim.jpg',
+        'runescape: dragonwilds':'brasao_runescape.png'
+      };
+      const jogo=nomeDoJogo(data).trim().toLowerCase();
       img.src=brasoes[jogo] || 'brasao_marreco_base.jpg';
       img.alt='Brasão do '+(nomeDoJogo(data)==='Jogo não identificado'?'Marreco':nomeDoJogo(data));
     }
