@@ -33,7 +33,9 @@ footer{color:var(--rune-dim);font-size:.8rem;margin-top:2.5rem}.status-stack{dis
   <footer>Escolha um servidor para continuar</footer>
   <script>
     const WORKER_URL='https://white-brook-c32d.ogioni-bh.workers.dev';
-    const JOGO_ATUAL='Valheim';
+    function nomeDoJogo(data){
+      return typeof data.jogo==='string' && data.jogo.trim() ? data.jogo.trim() : 'Jogo não identificado';
+    }
     function atualizarLed(id,labelId,texto,estado){
       const box=document.getElementById(id), label=document.getElementById(labelId);
       if(estado===true){box.className='status-real on';label.textContent=texto+' LIGADA';}
@@ -48,7 +50,7 @@ footer{color:var(--rune-dim);font-size:.8rem;margin-top:2.5rem}.status-stack{dis
         if(data.esp!==true) throw new Error('ESP indisponível');
         atualizarLed('machineStatus','machineLabel','Máquina',data.maquina===true);
         const server=document.getElementById('serverStatus'), label=document.getElementById('serverLabel');
-        if(data.servidor===true){server.className='status-real on';label.textContent='Servidor LIGADO — Jogo Atual: '+JOGO_ATUAL;}
+        if(data.servidor===true){server.className='status-real on';label.textContent='Servidor LIGADO — Jogo Atual: '+nomeDoJogo(data);}
         else if(data.servidor===false){server.className='status-real off';label.textContent='Servidor DESLIGADO';}
         else{server.className='status-real unavailable';label.textContent='Servidor INDISPONÍVEL';}
       }catch(e){
