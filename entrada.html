@@ -17,7 +17,7 @@ main{width:min(100%,30rem);text-align:center}
 h1{font-family:Cinzel,serif;font-weight:700;font-size:2rem;letter-spacing:.02em;margin:0;color:var(--ink)}
 .sub{color:var(--muted);font-size:1rem;margin:.45rem 0 1.2rem}
 .rune-divider{color:var(--rune-dim);letter-spacing:.5em;font-size:.9rem}
-footer{color:var(--rune-dim);font-size:.8rem;margin-top:2.5rem}
+footer{color:var(--rune-dim);font-size:.8rem;margin-top:2.5rem}.status-stack{display:flex;flex-direction:column;gap:.65rem;margin:1.5rem auto 0}.status-real{display:flex;align-items:center;justify-content:center;gap:.65rem;line-height:1;color:var(--muted);font-size:.95rem}.status-dot{display:inline-block;width:1rem;height:1rem;min-width:1rem;border-radius:50%;background:#293133;border:1px solid #4B5958;box-shadow:inset 2px 2px 3px rgba(0,0,0,.55),inset -1px -1px 2px rgba(255,255,255,.08)}.status-real.on{color:var(--rune)}.status-real.on .status-dot{background:radial-gradient(circle at 35% 30%,#E7FFF4 0 12%,var(--rune) 42%,#477565 100%);border-color:var(--rune);box-shadow:0 0 5px var(--rune),0 0 14px rgba(143,184,168,.65),inset -2px -2px 3px rgba(0,0,0,.25)}.status-real.off{color:var(--ember,#C97B4A)}.status-real.off .status-dot{background:radial-gradient(circle at 35% 30%,#FFE8DC 0 10%,var(--ember,#C97B4A) 42%,#713C2C 100%);border-color:var(--ember,#C97B4A);box-shadow:0 0 5px var(--ember,#C97B4A),0 0 14px rgba(201,123,74,.5),inset -2px -2px 3px rgba(0,0,0,.25)}.status-real.unavailable{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -26,7 +26,39 @@ footer{color:var(--rune-dim);font-size:.8rem;margin-top:2.5rem}
   <h1>Servidor do Marreco</h1>
   <p class="sub">Bem-vindo</p>
   <div class="rune-divider">✦ ✦ ✦</div>
+  <div class="status-stack" aria-live="polite">
+    <div id="machineStatus" class="status-real unavailable"><span class="status-dot"></span><span id="machineLabel">Máquina INDISPONÍVEL</span></div>
+    <div id="serverStatus" class="status-real unavailable"><span class="status-dot"></span><span id="serverLabel">Servidor INDISPONÍVEL — Jogo Atual: Valheim</span></div>
+  </div>
   <footer>Escolha um servidor para continuar</footer>
+  <script>
+    const WORKER_URL='https://white-brook-c32d.ogioni-bh.workers.dev';
+    const JOGO_ATUAL='Valheim';
+    function atualizarLed(id,labelId,texto,estado){
+      const box=document.getElementById(id), label=document.getElementById(labelId);
+      if(estado===true){box.className='status-real on';label.textContent=texto+' LIGADA';}
+      else if(estado===false){box.className='status-real off';label.textContent=texto+' DESLIGADA';}
+      else{box.className='status-real unavailable';label.textContent=texto+' INDISPONÍVEL';}
+    }
+    async function atualizarStatus(){
+      try{
+        const r=await fetch(WORKER_URL+'/status.json?ts='+Date.now(),{cache:'no-store'});
+        if(!r.ok) throw new Error('HTTP '+r.status);
+        const data=await r.json();
+        if(data.esp!==true) throw new Error('ESP indisponível');
+        atualizarLed('machineStatus','machineLabel','Máquina',data.maquina===true);
+        const server=document.getElementById('serverStatus'), label=document.getElementById('serverLabel');
+        if(data.servidor===true){server.className='status-real on';label.textContent='Servidor LIGADO — Jogo Atual: '+JOGO_ATUAL;}
+        else if(data.servidor===false){server.className='status-real off';label.textContent='Servidor DESLIGADO — Jogo Atual: '+JOGO_ATUAL;}
+        else{server.className='status-real unavailable';label.textContent='Servidor INDISPONÍVEL — Jogo Atual: '+JOGO_ATUAL;}
+      }catch(e){
+        atualizarLed('machineStatus','machineLabel','Máquina',null);
+        const server=document.getElementById('serverStatus');server.className='status-real unavailable';document.getElementById('serverLabel').textContent='Servidor INDISPONÍVEL — Jogo Atual: '+JOGO_ATUAL;
+      }
+    }
+    atualizarStatus();
+    setInterval(atualizarStatus,15000);
+  </script>
 </main>
 </body>
 </html>
