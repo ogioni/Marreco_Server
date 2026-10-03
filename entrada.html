@@ -92,6 +92,7 @@ footer{color:var(--rune-dim);font-size:.8rem;margin-top:2.5rem}.btn{display:bloc
       btn.textContent=maquinaOff?'Ligar Máquina/Servidor':'Ligar Servidor';
       joinBtn.hidden=!valheimLigado || inicializando;
       joinBtn.disabled=inicializando;
+      if(!valheimLigado) atualizarJoinCode(false);
     }
     async function lerStatus(){
       const r=await fetch(WORKER_URL+'/status.json?ts='+Date.now(),{cache:'no-store'});
