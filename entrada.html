@@ -37,7 +37,8 @@ footer{color:var(--rune-dim);font-size:.8rem;margin-top:2.5rem}.btn{display:bloc
     <div id="serverStatus" class="status-real unavailable"><span class="status-dot"></span><span id="serverLabel">Servidor INDISPONÍVEL</span></div>
   </div>
   <div id="joinCodeBox" class="join-code-box" hidden><span class="join-code-label">Join Code</span><strong id="joinCodeValue" class="join-code-value"></strong></div>
-  <button id="btnLigar" class="btn" type="button" hidden>Ligar Servidor</button>
+  <button id="btnLigar" class="btn" type="button" hidden>Ligar Máquina/Servidor</button>
+  <button id="btnJoin" class="btn" type="button" hidden>Exibir Join Code</button>
   <p id="progress" class="progress" aria-live="polite"></p>
   <footer>Escolha um servidor para continuar</footer>
   <script>
@@ -81,10 +82,16 @@ footer{color:var(--rune-dim);font-size:.8rem;margin-top:2.5rem}.btn{display:bloc
       else if(data.servidor===false){server.className='status-real off';label.textContent='Servidor DESLIGADO';}
       else{server.className='status-real unavailable';label.textContent='Servidor INDISPONÍVEL';}
       atualizarBrasao(data);
-      atualizarJoinCode(data.servidor===true);
       const btn=document.getElementById('btnLigar');
-      btn.hidden=data.maquina!==false || inicializando;
+      const joinBtn=document.getElementById('btnJoin');
+      const maquinaOff=data.maquina===false;
+      const servidorOff=data.maquina===true && data.servidor===false;
+      const valheimLigado=data.servidor===true && nomeDoJogo(data).toLowerCase()==='valheim';
+      btn.hidden=!(maquinaOff || servidorOff) || inicializando;
       btn.disabled=inicializando;
+      btn.textContent=maquinaOff?'Ligar Máquina/Servidor':'Ligar Servidor';
+      joinBtn.hidden=!valheimLigado || inicializando;
+      joinBtn.disabled=inicializando;
     }
     async function lerStatus(){
       const r=await fetch(WORKER_URL+'/status.json?ts='+Date.now(),{cache:'no-store'});
@@ -100,10 +107,16 @@ footer{color:var(--rune-dim);font-size:.8rem;margin-top:2.5rem}.btn{display:bloc
         const server=document.getElementById('serverStatus');server.className='status-real unavailable';document.getElementById('serverLabel').textContent='Servidor INDISPONÍVEL';
         atualizarJoinCode(false);
         document.getElementById('btnLigar').hidden=true;
+        document.getElementById('btnJoin').hidden=true;
       }
     }
     async function ligarServidor(){
-      const senha=prompt('Digite a senha para ligar o servidor:');
+      const data=ultimoStatus;
+      if(data && data.maquina===true && data.servidor===false){
+        alert('A escolha do servidor ainda será implementada. Nenhum servidor foi iniciado.');
+        return;
+      }
+      const senha=prompt('Digite a senha para ligar a máquina:');
       if(senha===null) return;
       if(senha!==SENHA){alert('Senha inválida.');return;}
       const btn=document.getElementById('btnLigar'), progress=document.getElementById('progress');
@@ -113,16 +126,23 @@ footer{color:var(--rune-dim);font-size:.8rem;margin-top:2.5rem}.btn{display:bloc
         if(!r.ok) throw new Error('HTTP '+r.status);
         for(let i=0;i<40;i++){
           await new Promise(resolve=>setTimeout(resolve,3000));
-          let data;try{data=await lerStatus();}catch(e){continue;}
-          aplicarStatus(data);
-          progress.textContent=data.servidor===true?'Servidor ligado.':data.maquina===true?'Máquina ligada. Aguardando o servidor...':'Ligando máquina...';
-          if(data.servidor===true){inicializando=false;progress.textContent='';aplicarStatus(data);return;}
+          let novo;try{novo=await lerStatus();}catch(e){continue;}
+          aplicarStatus(novo);
+          progress.textContent=novo.maquina===true?'Máquina ligada. Escolha o servidor para iniciar.':'Ligando máquina...';
+          if(novo.maquina===true){inicializando=false;progress.textContent='';aplicarStatus(novo);return;}
         }
         progress.textContent='A máquina ainda está iniciando. Atualize em alguns segundos.';
       }catch(e){progress.textContent='Não foi possível enviar o comando.';}
       inicializando=false;await atualizarStatus();
     }
+    async function exibirJoinCode(){
+      const senha=prompt('Digite a senha para exibir o Join Code:');
+      if(senha===null) return;
+      if(senha!==SENHA){alert('Senha inválida.');return;}
+      await atualizarJoinCode(true);
+    }
     document.getElementById('btnLigar').addEventListener('click',ligarServidor);
+    document.getElementById('btnJoin').addEventListener('click',exibirJoinCode);
     atualizarStatus();
     setInterval(atualizarStatus,15000);
   </script>
