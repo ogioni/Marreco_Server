@@ -9,6 +9,7 @@ const ROTAS_PUBLICAS = new Set([
 const ROTAS_PROTEGIDAS = new Set([
   "/ligar",
   "/joincode",
+  "/config",
   "/admin-auth"
 ]);
 
@@ -36,7 +37,7 @@ export default {
     }
 
     const senha = typeof dados?.senha === "string" ? dados.senha : "";
-    const segredoEsperado = entrada.pathname === "/admin-auth"
+    const segredoEsperado = entrada.pathname === "/admin-auth" || entrada.pathname === "/config"
       ? env.CONFIG_PASSWORD
       : env.ADMIN_PASSWORD;
 
@@ -46,6 +47,15 @@ export default {
 
     if (entrada.pathname === "/admin-auth") {
       return respostaCors(JSON.stringify({ ok: true }), 200, "application/json");
+    }
+
+    if (entrada.pathname === "/config") {
+      return encaminharESP32(
+        new URL("/config", entrada.origin),
+        "GET",
+        `senha=${encodeURIComponent(env.ESP32_JOINCODE_PASSWORD)}`,
+        env
+      );
     }
 
     if (entrada.pathname === "/ligar") {
