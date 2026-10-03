@@ -93,6 +93,34 @@ const statusText=document.getElementById('statusText');
 const fields=document.getElementById('fields');
 const save=document.getElementById('save');
 const message=document.getElementById('message');
+let senhaConfig=sessionStorage.getItem('configPassword')||'';
+
+async function lerConfiguracoes(){
+  if(!senhaConfig){
+    senhaConfig=prompt('Digite a senha das configurações:')||'';
+    if(!senhaConfig) return false;
+    sessionStorage.setItem('configPassword',senhaConfig);
+  }
+  const r=await fetch(WORKER_URL+'/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({senha:senhaConfig}),cache:'no-store'});
+  if(r.status===401){sessionStorage.removeItem('configPassword');senhaConfig='';throw new Error('Senha inválida');}
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  const resposta=await r.json();
+  const c=resposta.configuracoes||{};
+  const valor=(id,defaultValue='')=>{const el=document.getElementById(id);if(el)el.value=c[id]??defaultValue;};
+  valor('name');valor('world');valor('password');valor('port');valor('public');valor('savedir');valor('logFile');valor('instanceid');
+  valor('preset','');valor('saveinterval');valor('backups');valor('backupshort');valor('backuplong');
+  document.getElementById('crossplay').checked=!!c.crossplay;
+  const mods=c.modifiers||{};
+  ['combat','deathPenalty','resources','raids','portals'].forEach(id=>{
+    const chave=id==='deathPenalty'?'DeathPenalty':id[0].toUpperCase()+id.slice(1);
+    document.getElementById(id).value=mods[chave]||mods[chave.toLowerCase()]||'';
+  });
+  const keys=c.setkeys||[];
+  ['nobuildcost','playerevents','passivemobs','nomap'].forEach(key=>{const el=document.querySelector('[name="'+key+'"]');if(el)el.checked=keys.includes(key);});
+  message.textContent='Configurações atuais carregadas. Salvamento ainda desativado.';
+  return true;
+}
+
 async function verificarServidor(){
   try{
     const r=await fetch(WORKER_URL+'/status.json?ts='+Date.now(),{cache:'no-store'});
@@ -103,14 +131,25 @@ async function verificarServidor(){
     statusBox.className='status '+(ativo?'on':'off');
     statusText.textContent=ativo?'Servidor UP — configurações liberadas para visualização':'Servidor DESLIGADO — configurações bloqueadas';
     fields.disabled=!ativo;
-    save.disabled=!ativo;
+    save.disabled=true;
+    if(ativo) await lerConfiguracoes();
+    else message.textContent='';
     return ativo;
   }catch(e){
-    statusBox.className='status off';statusText.textContent='Status indisponível — configurações bloqueadas';fields.disabled=true;save.disabled=true;return false;
+    statusBox.className='status off';
+    statusText.textContent='Status indisponível — configurações bloqueadas';
+    fields.disabled=true;save.disabled=true;
+    message.textContent=e.message==='Senha inválida'?'Senha de configurações inválida.':'Não foi possível carregar as configurações.';
+    return false;
   }
 }
-document.getElementById('configForm').addEventListener('submit',e=>{e.preventDefault();message.textContent='A gravação ainda não está conectada ao Ubuntu. Nenhuma alteração foi feita.';});
-verificarServidor();setInterval(verificarServidor,15000);
+
+document.getElementById('configForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  message.textContent='A gravação ainda está desativada. Nenhuma alteração foi feita.';
+});
+verificarServidor();
+setInterval(verificarServidor,15000);
 </script>
 </body>
 </html>
