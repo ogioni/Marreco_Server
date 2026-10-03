@@ -36,7 +36,11 @@ export default {
     }
 
     const senha = typeof dados?.senha === "string" ? dados.senha : "";
-    if (!senha || senha !== env.ADMIN_PASSWORD) {
+    const segredoEsperado = entrada.pathname === "/admin-auth"
+      ? env.CONFIG_PASSWORD
+      : env.ADMIN_PASSWORD;
+
+    if (!senha || senha !== segredoEsperado) {
       return respostaCors(JSON.stringify({ erro: "Não autorizado" }), 401, "application/json");
     }
 
