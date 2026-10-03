@@ -44,7 +44,7 @@ footer{color:var(--rune-dim);font-size:.8rem;margin-top:2.5rem}.btn{display:bloc
   <script>
     const WORKER_URL='https://white-brook-c32d.ogioni-bh.workers.dev';
     const SENHA='crbr';
-    let ultimoStatus=null, inicializando=false;
+    let ultimoStatus=null, inicializando=false, joinCodeExibido=false;
     function nomeDoJogo(data){return typeof data.jogo==='string' && data.jogo.trim() ? data.jogo.trim() : 'Jogo não identificado';}
     function atualizarBrasao(data){
       const img=document.getElementById('brasaoJogo');
@@ -59,7 +59,7 @@ footer{color:var(--rune-dim);font-size:.8rem;margin-top:2.5rem}.btn{display:bloc
     }
     async function atualizarJoinCode(ativo){
       const box=document.getElementById('joinCodeBox'), value=document.getElementById('joinCodeValue');
-      if(!ativo){box.hidden=true;value.textContent='';return;}
+      if(!ativo){joinCodeExibido=false;box.hidden=true;value.textContent='';return;}
       try{
         const r=await fetch(WORKER_URL+'/joincode?senha='+encodeURIComponent(SENHA)+'&ts='+Date.now(),{cache:'no-store'});
         if(!r.ok) throw new Error('HTTP '+r.status);
@@ -67,6 +67,7 @@ footer{color:var(--rune-dim);font-size:.8rem;margin-top:2.5rem}.btn{display:bloc
         if(data.joincode){
           value.textContent=data.joincode;
           box.hidden=false;
+          joinCodeExibido=true;
           document.getElementById('btnJoin').hidden=true;
         }
         else{
@@ -97,7 +98,7 @@ footer{color:var(--rune-dim);font-size:.8rem;margin-top:2.5rem}.btn{display:bloc
       btn.hidden=!(maquinaOff || servidorOff) || inicializando;
       btn.disabled=inicializando;
       btn.textContent=maquinaOff?'Ligar Máquina/Servidor':'Ligar Servidor';
-      joinBtn.hidden=!valheimLigado || inicializando;
+      joinBtn.hidden=!valheimLigado || inicializando || joinCodeExibido;
       joinBtn.disabled=inicializando;
       if(!valheimLigado) atualizarJoinCode(false);
     }
